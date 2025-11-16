@@ -1,81 +1,70 @@
 ﻿<Window x:Class="WPF_BGPU.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="450" Width="800" Name="MainWin">
 
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
+
+        <Menu Grid.Row="0" Background="White" BorderBrush="Navy" BorderThickness="1">
+            <MenuItem Header="_Файл">
+                <MenuItem Header="_Открыть" Click="AboutMenuItem_Click_Open"/>
+                <MenuItem Header="_Сохранить" Click="AboutMenuItem_Click_Save"/>
+                <Separator />
+                <MenuItem Header="_Закрыть" Click="AboutMenuItem_Click_Exit"/>
+            </MenuItem>
+            <MenuItem Header="_О программе" Click="AboutMenuItem_Click"/>
+        </Menu>
+
+        <ToolBar Grid.Row="1">
+            <Button Name="Click_Open" Click="AboutMenuItem_Click_Open">
+                <Image Source="https://cdn-icons-png.flaticon.com/32/5082/5082610.png" Width="24" Height="24"/>
+            </Button>
+            <Separator/>
+            <Button Name="Click_Save" Click="AboutMenuItem_Click_Save">
+                <Image Source="https://cdn-icons-png.flaticon.com/32/2186/2186753.png" Width="24" Height="24"/>
+            </Button>
+            <Separator/>
+            
+            <TextBlock Text="Цвет кисти: " VerticalAlignment="Center" Margin="5,0"/>
+            <ComboBox Name="BrushColorComboBox" Width="100" SelectionChanged="BrushColorComboBox_SelectionChanged">
+                <ComboBoxItem Content="Красный" IsSelected="True"/>
+                <ComboBoxItem Content="Синий"/>
+                <ComboBoxItem Content="Зелёный"/>
+                <ComboBoxItem Content="Жёлтый"/>
+            </ComboBox>
+            
+            <TextBlock Text="Размер кисти: " VerticalAlignment="Center" Margin="5,0"/>
+            <Slider Name="BrushSizeSlider" Height="25" Width="100" Minimum="1" Maximum="100" Value="20"
+        ValueChanged="BrushSizeSlider_ValueChanged"/>
+            <TextBlock Name="BrushSizeText" Text="20" VerticalAlignment="Center" Margin="5,0"/>
         
-        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="10">
 
-            <Label Content="Последние документы"
-                   VerticalAlignment="Center"
-                   Margin="0,0,20,0"/>
+        <TextBlock Text="Режим работы: " VerticalAlignment="Center" Margin="5,0"/>
+        <ComboBox Name="ModeComboBox" Width="100" SelectionChanged="ModeComboBox_SelectionChanged">
+            <ComboBoxItem Content="Рисование" IsSelected="True"/>
+            <ComboBoxItem Content="Редактирование"/>
+                <ComboBoxItem Content="Удаление"/>
+            </ComboBox>
 
-            <Button Content="Открыть" Margin="0,0,10,0"/>
-            <Button Content="Сохранить" Margin="0,0,10,0"/>
-            <Button Content="Закрыть" Margin="0,0,10,0"/>
-            <Button Content="Обработать" Margin="0,0,10,0"/>
-            <Button Content="О программе"/>
+        </ToolBar>
 
-        </StackPanel>
+        <Grid Grid.Row="2" Background="LightGray">
+            <InkCanvas Name="MyInkCanvas">
+                <InkCanvas.DefaultDrawingAttributes>
+                    <DrawingAttributes Color="Red" Height="20" Width="20"/>
+                </InkCanvas.DefaultDrawingAttributes>
+            </InkCanvas>
+        </Grid>
 
-        <StackPanel Grid.Row="1" Margin="20,5,0,0">
-
-            <TextBlock Text="1.txt"/>
-            <TextBlock Text="2.txt"/>
-            <TextBlock Text="3.txt"/>
-            <TextBlock Text="4.txt"/>
-            <TextBlock Text="5.txt"/>
-            <TextBlock Text="6.txt"/>
-
-        </StackPanel>
-
-        <StackPanel Grid.Row="1" Margin="170,5,0,0" Orientation="Horizontal">
-
-            <TextBlock Text="1.txt"/>
-            <TextBlock Text="2.txt"/>
-            <TextBlock Text="3.txt"/>
-
-        </StackPanel>
-
-        <UniformGrid Rows="1" Columns="6" Margin="135,23,0,240" Grid.RowSpan="2">
-            <Border Background="Yellow" Width="50" Height="50" CornerRadius="5"
-            BorderBrush="DarkBlue" BorderThickness="2" Margin="5">
-                <TextBlock Text="A" 
-                   HorizontalAlignment="Center" 
-                   VerticalAlignment="Center"
-                   FontWeight="Bold"/>
-            </Border>
-
-            <Border Background="Red" Width="50" Height="50" CornerRadius="5"
-            BorderBrush="DarkBlue" BorderThickness="2" Margin="5">
-                <TextBlock Text="B" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="Bold"/>
-            </Border>
-
-            <Border Background="Green" Width="50" Height="50" CornerRadius="5"
-            BorderBrush="DarkBlue" BorderThickness="2" Margin="5">
-                <TextBlock Text="C" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="Bold"/>
-            </Border>
-
-            <Border Background="Blue" Width="50" Height="50" CornerRadius="5"
-            BorderBrush="DarkBlue" BorderThickness="2" Margin="5">
-                <TextBlock Text="D" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="Bold"/>
-            </Border>
-
-            <Border Background="Coral" Width="50" Height="50" CornerRadius="5"
-            BorderBrush="DarkBlue" BorderThickness="2" Margin="5">
-                <TextBlock Text="E" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="Bold"/>
-            </Border>
-
-            <Border Background="Aquamarine" Width="50" Height="50" CornerRadius="5"
-            BorderBrush="DarkBlue" BorderThickness="2" Margin="5">
-                <TextBlock Text="F" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="Bold"/>
-            </Border>
-        </UniformGrid>
+        <StatusBar Grid.Row="3">
+            <TextBlock Name ="StatusText"  Text="" />
+        </StatusBar>
 
     </Grid>
 </Window>
