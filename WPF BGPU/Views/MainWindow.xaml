@@ -3,10 +3,9 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="clr-namespace:WPF_BGPU.ViewModels"
         Title="Учёт финансов"
-        Height="450"
-        Width="800">
+        Height="500"
+        Width="850">
 
-    <!-- ViewModel -->
     <Window.DataContext>
         <vm:MainViewModel/>
     </Window.DataContext>
@@ -14,22 +13,62 @@
     <Grid Margin="10">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
+            <!-- Фильтры -->
+            <RowDefinition Height="Auto"/>
+            <!-- Добавление -->
             <RowDefinition Height="*"/>
+            <!-- Таблица -->
         </Grid.RowDefinitions>
 
-        <!-- Фильтры -->
-        <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-            <DatePicker SelectedDate="{Binding StartDate}" />
-            <DatePicker SelectedDate="{Binding EndDate}" Margin="10,0"/>
-            <ComboBox ItemsSource="{Binding Categories}"
-                      SelectedItem="{Binding SelectedCategory}"
-                      Width="150"/>
+        <!-- ФИЛЬТРЫ -->
+        <StackPanel Grid.Row="0"
+                    Orientation="Horizontal"
+                    Margin="0,0,0,10">
+
+            <DatePicker Width="120"
+                        SelectedDate="{Binding FilterStartDate}"/>
+
+            <DatePicker Width="120"
+                        Margin="5,0"
+                        SelectedDate="{Binding FilterEndDate}"/>
+
+            <ComboBox Width="150"
+                      Margin="5,0"
+                      ItemsSource="{Binding Categories}"
+                      SelectedItem="{Binding FilterCategory}"/>
         </StackPanel>
 
-        <!-- Таблица операций -->
-        <DataGrid Grid.Row="1"
+        <!-- ДОБАВЛЕНИЕ ОПЕРАЦИИ -->
+        <StackPanel Grid.Row="1"
+                    Orientation="Horizontal"
+                    Margin="0,0,0,10">
+
+            <DatePicker Width="120"
+                        SelectedDate="{Binding NewDate}"/>
+
+            <ComboBox Width="140"
+                      Margin="5,0"
+                      ItemsSource="{Binding Categories}"
+                      SelectedItem="{Binding NewCategory}"/>
+
+            <TextBox Width="80"
+                     Margin="5,0"
+                     Text="{Binding NewAmount}"/>
+
+            <TextBox Width="200"
+                     Margin="5,0"
+                     Text="{Binding NewDescription}"/>
+
+            <Button Content="Добавить"
+                    Margin="5,0"
+                    Command="{Binding AddTransactionCommand}"/>
+        </StackPanel>
+
+        <!-- ТАБЛИЦА -->
+        <DataGrid Grid.Row="2"
                   ItemsSource="{Binding Transactions}"
                   AutoGenerateColumns="False">
+
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Дата" Binding="{Binding Date}"/>
                 <DataGridTextColumn Header="Категория" Binding="{Binding Category}"/>
