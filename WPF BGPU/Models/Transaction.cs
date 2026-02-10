@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace WPF_BGPU.Models
 {
@@ -10,9 +6,9 @@ namespace WPF_BGPU.Models
     {
         public int Id { get; set; }
         public DateTime Date { get; set; }
-        public string Category { get; set; }
+        public Category Category { get; set; } = new Category();
         public decimal Amount { get; set; }
-        public string Description { get; set; }
+        public string Description { get; set; } = string.Empty;
+        public Account Account { get; set; } = new Account();
     }
 }
-
