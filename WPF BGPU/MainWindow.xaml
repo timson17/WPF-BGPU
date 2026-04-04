@@ -1,265 +1,46 @@
-﻿<Window x:Class="WPF_BGPU.MultiEdit"
+﻿<Window x:Class="WPF_RunningButton.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="MultiEdit - Текстовый редактор с анимациями"
-        Height="550" Width="800"
-        WindowStartupLocation="CenterScreen">
-
-	<Window.Resources>
-		<!-- Стили с анимациями -->
-
-		<!-- Анимация для кнопок при наведении -->
-		<Style TargetType="Button" x:Key="AnimatedButton">
-			<Setter Property="Background" Value="#007ACC"/>
-			<Setter Property="Foreground" Value="White"/>
-			<Setter Property="FontSize" Value="14"/>
-			<Setter Property="Padding" Value="10,5"/>
-			<Setter Property="Margin" Value="5"/>
-			<Setter Property="Cursor" Value="Hand"/>
-			<Setter Property="BorderRadius" Value="5"/>
-			<Setter Property="Template">
-				<Setter.Value>
-					<ControlTemplate TargetType="Button">
-						<Border Background="{TemplateBinding Background}"
-                                BorderBrush="#005A9E"
-                                BorderThickness="1"
-                                CornerRadius="5">
-							<ContentPresenter HorizontalAlignment="Center"
-                                            VerticalAlignment="Center"/>
-						</Border>
-					</ControlTemplate>
-				</Setter.Value>
-			</Setter>
-			<Style.Triggers>
-				<EventTrigger RoutedEvent="MouseEnter">
-					<BeginStoryboard>
-						<Storyboard>
-							<ColorAnimation Storyboard.TargetProperty="Background.Color"
-                                          To="#005A9E"
-                                          Duration="0:0:0.2"/>
-							<DoubleAnimation Storyboard.TargetProperty="RenderTransform.ScaleX"
-                                           To="1.05"
-                                           Duration="0:0:0.1"/>
-							<DoubleAnimation Storyboard.TargetProperty="RenderTransform.ScaleY"
-                                           To="1.05"
-                                           Duration="0:0:0.1"/>
-						</Storyboard>
-					</BeginStoryboard>
-				</EventTrigger>
-				<EventTrigger RoutedEvent="MouseLeave">
-					<BeginStoryboard>
-						<Storyboard>
-							<ColorAnimation Storyboard.TargetProperty="Background.Color"
-                                          To="#007ACC"
-                                          Duration="0:0:0.2"/>
-							<DoubleAnimation Storyboard.TargetProperty="RenderTransform.ScaleX"
-                                           To="1"
-                                           Duration="0:0:0.1"/>
-							<DoubleAnimation Storyboard.TargetProperty="RenderTransform.ScaleY"
-                                           To="1"
-                                           Duration="0:0:0.1"/>
-						</Storyboard>
-					</BeginStoryboard>
-				</EventTrigger>
-			</Style.Triggers>
-			<Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>
-			<Setter Property="RenderTransform">
-				<Setter.Value>
-					<ScaleTransform/>
-				</Setter.Value>
-			</Setter>
-		</Style>
-
-		<!-- Анимация для текстового поля при получении фокуса -->
-		<Style TargetType="TextBox">
-			<Setter Property="FontSize" Value="14"/>
-			<Setter Property="Padding" Value="5"/>
-			<Setter Property="Margin" Value="5"/>
-			<Setter Property="BorderBrush" Value="#CCCCCC"/>
-			<Setter Property="BorderThickness" Value="1"/>
-			<Style.Triggers>
-				<Trigger Property="IsFocused" Value="True">
-					<Trigger.EnterActions>
-						<BeginStoryboard>
-							<Storyboard>
-								<ColorAnimation Storyboard.TargetProperty="BorderBrush.Color"
-                                              To="#007ACC"
-                                              Duration="0:0:0.2"/>
-								<DoubleAnimation Storyboard.TargetProperty="FontSize"
-                                               To="16"
-                                               Duration="0:0:0.15"/>
-							</Storyboard>
-						</BeginStoryboard>
-					</Trigger.EnterActions>
-					<Trigger.ExitActions>
-						<BeginStoryboard>
-							<Storyboard>
-								<ColorAnimation Storyboard.TargetProperty="BorderBrush.Color"
-                                              To="#CCCCCC"
-                                              Duration="0:0:0.2"/>
-								<DoubleAnimation Storyboard.TargetProperty="FontSize"
-                                               To="14"
-                                               Duration="0:0:0.15"/>
-							</Storyboard>
-						</BeginStoryboard>
-					</Trigger.ExitActions>
-				</Trigger>
-			</Style.Triggers>
-		</Style>
-
-		<!-- Анимация для загрузки окна -->
-		<Storyboard x:Key="WindowLoadedAnimation">
-			<DoubleAnimation Storyboard.TargetProperty="Opacity"
-                           From="0" To="1"
-                           Duration="0:0:0.5"/>
-			<DoubleAnimation Storyboard.TargetProperty="RenderTransform.ScaleX"
-                           From="0.8" To="1"
-                           Duration="0:0:0.3"/>
-			<DoubleAnimation Storyboard.TargetProperty="RenderTransform.ScaleY"
-                           From="0.8" To="1"
-                           Duration="0:0:0.3"/>
-		</Storyboard>
-
-		<!-- Анимация для всплывающих сообщений -->
-		<Style x:Key="FloatingMessageStyle" TargetType="Border">
-			<Setter Property="Background" Value="#333333"/>
-			<Setter Property="CornerRadius" Value="10"/>
-			<Setter Property="Padding" Value="20,10"/>
-			<Setter Property="Opacity" Value="0"/>
-		</Style>
-	</Window.Resources>
-
-	<Window.Triggers>
-		<EventTrigger RoutedEvent="Window.Loaded">
-			<BeginStoryboard Storyboard="{StaticResource WindowLoadedAnimation}"/>
-		</EventTrigger>
-	</Window.Triggers>
+        Title="Убегающая кнопка" Height="450" Width="600">
 
 	<Grid>
 		<Grid.RowDefinitions>
 			<RowDefinition Height="Auto"/>
 			<RowDefinition Height="*"/>
-			<RowDefinition Height="Auto"/>
 		</Grid.RowDefinitions>
 
-		<!-- Верхняя панель инструментов -->
-		<Border Grid.Row="0" Background="#2C3E50" Padding="10">
-			<StackPanel Orientation="Horizontal">
-				<Button Style="{StaticResource AnimatedButton}"
-                        Click="NewDocument_Click"
-                        ToolTip="Создать новый документ">
-					📄 Новый
-				</Button>
-
-				<Button Style="{StaticResource AnimatedButton}"
-                        Click="OpenDocument_Click"
-                        ToolTip="Открыть документ">
-					📂 Открыть
-				</Button>
-
-				<Button Style="{StaticResource AnimatedButton}"
-                        Click="SaveDocument_Click"
-                        ToolTip="Сохранить документ">
-					💾 Сохранить
-				</Button>
-
-				<Separator Width="20" Opacity="0"/>
-
-				<Button Style="{StaticResource AnimatedButton}"
-                        Click="CopyText_Click"
-                        ToolTip="Копировать">
-					📋 Копировать
-				</Button>
-
-				<Button Style="{StaticResource AnimatedButton}"
-                        Click="CutText_Click"
-                        ToolTip="Вырезать">
-					✂️ Вырезать
-				</Button>
-
-				<Button Style="{StaticResource AnimatedButton}"
-                        Click="PasteText_Click"
-                        ToolTip="Вставить">
-					📌 Вставить
-				</Button>
-
-				<Separator Width="20" Opacity="0"/>
-
-				<Button Style="{StaticResource AnimatedButton}"
-                        Click="ClearText_Click"
-                        Background="#E74C3C"
-                        ToolTip="Очистить всё">
-					🗑️ Очистить
-				</Button>
+		<!-- Панель управления -->
+		<StackPanel Grid.Row="0" Background="Gray" Margin="0,0,0,10">
+			<TextBlock Text="Убегающая кнопка" FontSize="16" FontWeight="Bold"
+                       Foreground="White" HorizontalAlignment="Center" Margin="5"/>
+			<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="5">
+				<TextBlock Text="Скорость:" Foreground="White"/>
+				<Slider x:Name="speedSlider" Width="100" Minimum="1" Maximum="10" Value="5" Margin="5,0,10,0"/>
+				<TextBlock x:Name="speedText" Foreground="White" Text="5"/>
 			</StackPanel>
-		</Border>
+		</StackPanel>
 
-		<!-- Основная область редактирования -->
-		<TabControl Grid.Row="1" Margin="10">
-			<TabItem Header="Документ 1">
-				<TextBox x:Name="TextEditor1"
-                         TextWrapping="Wrap"
-                         AcceptsReturn="True"
-                         AcceptsTab="True"
-                         VerticalScrollBarVisibility="Auto"
-                         SpellCheck.IsEnabled="True"/>
-			</TabItem>
+		<!-- Игровая область -->
+		<Canvas x:Name="gameCanvas" Grid.Row="1" Background="LightGray">
+			<Button x:Name="runButton"
+                    Content="Нажми меня"
+                    Width="100" Height="40"
+                    Background="Red" Foreground="White"
+                    FontSize="12" FontWeight="Bold"
+                    MouseEnter="runButton_MouseEnter"
+                    Click="runButton_Click"/>
+		</Canvas>
 
-			<TabItem Header="Документ 2">
-				<TextBox x:Name="TextEditor2"
-                         TextWrapping="Wrap"
-                         AcceptsReturn="True"
-                         AcceptsTab="True"
-                         VerticalScrollBarVisibility="Auto"/>
-			</TabItem>
-
-			<TabItem Header="Документ 3">
-				<TextBox x:Name="TextEditor3"
-                         TextWrapping="Wrap"
-                         AcceptsReturn="True"
-                         AcceptsTab="True"
-                         VerticalScrollBarVisibility="Auto"/>
-			</TabItem>
-		</TabControl>
-
-		<!-- Нижняя панель статуса -->
-		<Border Grid.Row="2" Background="#2C3E50" Padding="5">
-			<Grid>
-				<StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-					<TextBlock x:Name="StatusText"
-                               Foreground="White"
-                               VerticalAlignment="Center">
-						Готов к работе
-					</TextBlock>
-				</StackPanel>
-
-				<StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-					<TextBlock x:Name="WordCountText"
-                               Foreground="White"
-                               VerticalAlignment="Center"
-                               Margin="10,0">
-						Слов: 0
-					</TextBlock>
-
-					<TextBlock x:Name="CharCountText"
-                               Foreground="White"
-                               VerticalAlignment="Center"
-                               Margin="10,0">
-						Символов: 0
-					</TextBlock>
-				</StackPanel>
-			</Grid>
-		</Border>
-
-		<!-- Всплывающее сообщение -->
-		<Border x:Name="FloatingMessage"
-                Style="{StaticResource FloatingMessageStyle}"
-                HorizontalAlignment="Center"
-                VerticalAlignment="Center">
-			<TextBlock x:Name="MessageText"
-                       Foreground="White"
-                       FontSize="16"
-                       Text=""/>
+		<!-- Счетчик -->
+		<Border Background="White" BorderBrush="Black" BorderThickness="1"
+                CornerRadius="5" Width="100" Height="80"
+                HorizontalAlignment="Right" VerticalAlignment="Top"
+                Margin="0,40,10,0">
+			<StackPanel Margin="5">
+				<TextBlock Text="Статистика" FontWeight="Bold" HorizontalAlignment="Center"/>
+				<TextBlock x:Name="attemptsText" Text="0"/>
+				<TextBlock x:Name="successText" Text="0"/>
+			</StackPanel>
 		</Border>
 	</Grid>
 </Window>
