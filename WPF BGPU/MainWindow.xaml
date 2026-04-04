@@ -1,18 +1,112 @@
 ﻿<Window x:Class="WPF_BGPU.MainWindow"
-xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-Title="Без Viewbox" Height="300" Width="300">
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Переключатели" Height="400" Width="700">
 
-	<Grid>
-		<Canvas Width="200" Height="200" Background="LightGray">
+	<Viewbox>
 
-			<Rectangle Width="100" Height="100"
-                       Fill="Blue"
-                       Canvas.Left="50"
-                       Canvas.Top="50"/>
+		<Canvas Width="600" Height="300" Background="#EEE">
+
+			<Canvas.Resources>
+
+				<Style x:Key="SwitchStyle" TargetType="Grid">
+
+					<Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>
+
+					<Setter Property="RenderTransform">
+						<Setter.Value>
+							<TransformGroup>
+								<ScaleTransform ScaleX="1" ScaleY="1"/>
+								<RotateTransform Angle="0"/>
+							</TransformGroup>
+						</Setter.Value>
+					</Setter>
+
+					<Style.Triggers>
+
+						<EventTrigger RoutedEvent="MouseEnter">
+							<BeginStoryboard>
+								<Storyboard>
+									<DoubleAnimation
+                                        Storyboard.TargetProperty="RenderTransform.Children[0].ScaleX"
+                                        To="1.5" Duration="0:0:0.3"/>
+									<DoubleAnimation
+                                        Storyboard.TargetProperty="RenderTransform.Children[0].ScaleY"
+                                        To="1.5" Duration="0:0:0.3"/>
+								</Storyboard>
+							</BeginStoryboard>
+						</EventTrigger>
+
+						<EventTrigger RoutedEvent="MouseLeave">
+							<BeginStoryboard>
+								<Storyboard>
+									<DoubleAnimation
+                                        Storyboard.TargetProperty="RenderTransform.Children[0].ScaleX"
+                                        To="1" Duration="0:0:0.3"/>
+									<DoubleAnimation
+                                        Storyboard.TargetProperty="RenderTransform.Children[0].ScaleY"
+                                        To="1" Duration="0:0:0.3"/>
+								</Storyboard>
+							</BeginStoryboard>
+						</EventTrigger>
+
+
+						<EventTrigger RoutedEvent="MouseLeftButtonDown">
+							<BeginStoryboard>
+								<Storyboard>
+									<DoubleAnimation
+                                        Storyboard.TargetProperty="RenderTransform.Children[1].Angle"
+                                        By="20"
+                                        Duration="0:0:0.3"/>
+								</Storyboard>
+							</BeginStoryboard>
+						</EventTrigger>
+
+					</Style.Triggers>
+
+				</Style>
+
+			</Canvas.Resources>
+
+
+			<Grid Canvas.Left="100" Canvas.Top="120"
+                  Style="{StaticResource SwitchStyle}">
+
+				<Ellipse Width="80" Height="80" Fill="LightGray" Stroke="Gray"/>
+
+				<Ellipse Width="40" Height="40" Fill="Gray"/>
+
+				<Rectangle Width="50" Height="10"
+                           Fill="LightGreen"
+                           Stroke="DarkGreen"/>
+
+			</Grid>
+
+			<Grid Canvas.Left="260" Canvas.Top="120"
+                  Style="{StaticResource SwitchStyle}">
+
+				<Ellipse Width="80" Height="80" Fill="LightGray" Stroke="Gray"/>
+				<Ellipse Width="40" Height="40" Fill="Gray"/>
+				<Rectangle Width="50" Height="10"
+                           Fill="LightGreen"
+                           Stroke="DarkGreen"/>
+
+			</Grid>
+
+			<Grid Canvas.Left="420" Canvas.Top="120"
+                  Style="{StaticResource SwitchStyle}">
+
+				<Ellipse Width="80" Height="80" Fill="LightGray" Stroke="Gray"/>
+				<Ellipse Width="40" Height="40" Fill="Gray"/>
+				<Rectangle Width="50" Height="10"
+                           Fill="LightGreen"
+                           Stroke="DarkGreen"/>
+
+			</Grid>
 
 		</Canvas>
-	</Grid>
+
+	</Viewbox>
 
 </Window>
 
