@@ -1,118 +1,188 @@
 ﻿using System;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Media.Animation;
+using System.Windows.Media;
+using System.Windows.Threading;
 
-namespace WPF_RunningButton
+namespace WPF_BGPU
 {
     public partial class MainWindow : Window
     {
-        private Random rand = new Random();
-        private int attempts = 0;
-        private int successes = 0;
-        private bool isMoving = false;
+        private DispatcherTimer animationTimer;
+        private int currentState = 0;
+        private double currentValue = 0;
+        private bool isAnimating = false;
+
+        private Color[] centerColors;
+        private Color[] edgeColors;
+        private string[] stateNames;
+        private double[] centerPoints;
+        private double[] radiuses;
 
         public MainWindow()
         {
             InitializeComponent();
 
-            // Устанавливаем обработчик изменения скорости
-            speedSlider.ValueChanged += (s, e) => speedText.Text = ((int)speedSlider.Value).ToString();
-
-            // Устанавливаем начальную позицию кнопки
-            Loaded += (s, e) => SetButtonPosition();
-            gameCanvas.SizeChanged += (s, e) => SetButtonPosition();
-        }
-
-        private void SetButtonPosition()
-        {
-            if (gameCanvas.ActualWidth == 0) return;
-
-            double x = (gameCanvas.ActualWidth - runButton.Width) / 2;
-            double y = (gameCanvas.ActualHeight - runButton.Height) / 2;
-
-            Canvas.SetLeft(runButton, x);
-            Canvas.SetTop(runButton, y);
-        }
-
-        private void runButton_MouseEnter(object sender, System.Windows.Input.MouseEventArgs e)
-        {
-            if (isMoving) return;
-
-            isMoving = true;
-            attempts++;
-            UpdateStats();
-
-            // Получаем позицию мыши
-            Point mouse = e.GetPosition(gameCanvas);
-            double left = Canvas.GetLeft(runButton);
-            double top = Canvas.GetTop(runButton);
-
-            // Вычисляем направление убегания
-            double dx = left - mouse.X;
-            double dy = top - mouse.Y;
-
-            if (Math.Abs(dx) < 1 && Math.Abs(dy) < 1)
+            centerColors = new Color[]
             {
-                dx = rand.Next(-50, 50);
-                dy = rand.Next(-50, 50);
+                Color.FromRgb(0, 0, 139),    // Покой - темно-синий
+                Color.FromRgb(255, 165, 0),  // Расширение - оранжевый
+                Color.FromRgb(255, 0, 0),    // Пик - красный
+                Color.FromRgb(255, 165, 0),  // Сжатие - оранжевый
+                Color.FromRgb(0, 0, 139)     // Минимум - темно-синий
+            };
+
+            edgeColors = new Color[]
+            {
+                Color.FromRgb(0, 0, 0),       // Покой - черный
+                Color.FromRgb(139, 0, 0),     // Расширение - темно-красный
+                Color.FromRgb(255, 255, 0),   // Пик - желтый
+                Color.FromRgb(139, 0, 0),     // Сжатие - темно-красный
+                Color.FromRgb(0, 0, 0)        // Минимум - черный
+            };
+
+            stateNames = new string[]
+            {
+                "Покой",
+                "Расширение",
+                "Пик",
+                "Сжатие",
+                "Минимум"
+            };
+
+            centerPoints = new double[] { 0.3, 0.4, 0.5, 0.4, 0.2 };
+            radiuses = new double[] { 0.5, 0.6, 0.8, 0.6, 0.3 };
+
+            animationTimer = new DispatcherTimer();
+            animationTimer.Interval = TimeSpan.FromMilliseconds(50);
+            animationTimer.Tick += AnimationTimer_Tick;
+
+            this.Loaded += MainWindow_Loaded;
+
+            ApplyGradient(centerColors[0], edgeColors[0], centerPoints[0], radiuses[0]);
+
+            if (stateText != null)
+            {
+                stateText.Text = $"Состояние: {stateNames[0]}";
+            }
+        }
+
+        private void MainWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (speedValue != null && speedSlider != null)
+            {
+                speedValue.Text = speedSlider.Value.ToString("F1");
+            }
+        }
+
+        private void AnimationTimer_Tick(object sender, EventArgs e)
+        {
+            if (!isAnimating) return;
+
+            double speed = speedSlider.Value * 0.03;
+            currentValue += speed;
+
+            if (currentValue >= 1)
+            {
+                currentValue = 0;
+                currentState++;
+
+                if (currentState >= 5)
+                {
+                    currentState = 0;
+                }
+
+                if (stateText != null)
+                {
+                    stateText.Text = $"Состояние: {stateNames[currentState]}";
+                }
             }
 
-            // Нормализуем вектор
-            double len = Math.Sqrt(dx * dx + dy * dy);
-            if (len > 0)
+            int nextState = (currentState + 1) % 5;
+            double t = EaseInOut(currentValue);
+
+            Color centerColor = InterpolateColor(centerColors[currentState], centerColors[nextState], t);
+            Color edgeColor = InterpolateColor(edgeColors[currentState], edgeColors[nextState], t);
+            double centerPoint = centerPoints[currentState] + (centerPoints[nextState] - centerPoints[currentState]) * t;
+            double radius = radiuses[currentState] + (radiuses[nextState] - radiuses[currentState]) * t;
+
+            ApplyGradient(centerColor, edgeColor, centerPoint, radius);
+        }
+
+        private double EaseInOut(double t)
+        {
+            return t < 0.5 ? 2 * t * t : 1 - Math.Pow(-2 * t + 2, 2) / 2;
+        }
+
+        private Color InterpolateColor(Color c1, Color c2, double t)
+        {
+            return Color.FromArgb(
+                255,
+                (byte)(c1.R + (c2.R - c1.R) * t),
+                (byte)(c1.G + (c2.G - c1.G) * t),
+                (byte)(c1.B + (c2.B - c1.B) * t)
+            );
+        }
+
+        private void ApplyGradient(Color centerColor, Color edgeColor, double centerPoint, double radius)
+        {
+            if (pulsarEllipse == null) return;
+
+            RadialGradientBrush gradient = new RadialGradientBrush();
+            gradient.GradientOrigin = new Point(0.5, 0.5);
+            gradient.Center = new Point(0.5, 0.5);
+            gradient.RadiusX = radius;
+            gradient.RadiusY = radius;
+
+            gradient.GradientStops.Clear();
+            gradient.GradientStops.Add(new GradientStop(centerColor, 0.0));
+            gradient.GradientStops.Add(new GradientStop(centerColor, Math.Max(0, centerPoint - 0.05)));
+            gradient.GradientStops.Add(new GradientStop(edgeColor, Math.Min(1, centerPoint + 0.05)));
+            gradient.GradientStops.Add(new GradientStop(edgeColor, 1.0));
+
+            pulsarEllipse.Fill = gradient;
+        }
+
+        private void StartButton_Click(object sender, RoutedEventArgs e)
+        {
+            isAnimating = true;
+            animationTimer.Start();
+            if (startButton != null)
+                startButton.Background = new SolidColorBrush(Color.FromRgb(0, 100, 0));
+            if (stopButton != null)
+                stopButton.Background = new SolidColorBrush(Color.FromRgb(231, 76, 60));
+        }
+
+        private void StopButton_Click(object sender, RoutedEventArgs e)
+        {
+            isAnimating = false;
+            animationTimer.Stop();
+            if (startButton != null)
+                startButton.Background = new SolidColorBrush(Color.FromRgb(46, 204, 113));
+            if (stopButton != null)
+                stopButton.Background = new SolidColorBrush(Color.FromRgb(192, 57, 43));
+        }
+
+        private void ResetButton_Click(object sender, RoutedEventArgs e)
+        {
+            isAnimating = false;
+            animationTimer.Stop();
+            currentState = 0;
+            currentValue = 0;
+            ApplyGradient(centerColors[0], edgeColors[0], centerPoints[0], radiuses[0]);
+            if (stateText != null)
+                stateText.Text = $"Состояние: {stateNames[0]}";
+            if (startButton != null)
+                startButton.Background = new SolidColorBrush(Color.FromRgb(46, 204, 113));
+            if (stopButton != null)
+                stopButton.Background = new SolidColorBrush(Color.FromRgb(231, 76, 60));
+        }
+
+        private void SpeedSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (speedValue != null)
             {
-                dx = dx / len;
-                dy = dy / len;
+                speedValue.Text = speedSlider.Value.ToString("F1");
             }
-
-            // Расстояние убегания
-            double distance = 100 * (speedSlider.Value / 5);
-
-            // Новая позиция
-            double newX = left + dx * distance;
-            double newY = top + dy * distance;
-
-            // Проверка границ
-            double maxX = gameCanvas.ActualWidth - runButton.Width;
-            double maxY = gameCanvas.ActualHeight - runButton.Height;
-
-            if (newX < 0) newX = 0;
-            if (newX > maxX) newX = maxX;
-            if (newY < 0) newY = 0;
-            if (newY > maxY) newY = maxY;
-
-            // Анимация движения
-            double duration = 80 / speedSlider.Value;
-            DoubleAnimation animX = new DoubleAnimation(left, newX, TimeSpan.FromMilliseconds(duration));
-            DoubleAnimation animY = new DoubleAnimation(top, newY, TimeSpan.FromMilliseconds(duration));
-
-            animX.Completed += (s, e) => isMoving = false;
-
-            runButton.BeginAnimation(Canvas.LeftProperty, animX);
-            runButton.BeginAnimation(Canvas.TopProperty, animY);
-        }
-
-        private void runButton_Click(object sender, RoutedEventArgs e)
-        {
-            successes++;
-            UpdateStats();
-
-            // Эффект при клике
-            runButton.Content = "Поймал!";
-            var timer = new System.Windows.Threading.DispatcherTimer();
-            timer.Interval = TimeSpan.FromSeconds(0.5);
-            timer.Tick += (s, args) => { runButton.Content = "Нажми меня"; timer.Stop(); };
-            timer.Start();
-
-            // Возвращаем кнопку в центр
-            SetButtonPosition();
-        }
-
-        private void UpdateStats()
-        {
-            attemptsText.Text = $"Попыток: {attempts}";
-            successText.Text = $"Успехов: {successes}";
         }
     }
 }
