@@ -1,56 +1,131 @@
 ﻿<Window x:Class="WPF_BGPU.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Style Demo" Height="250" Width="450">
+        Title="Текстовый редактор" Height="500" Width="800"
+        Background="#EEE">
 
-    <Window.Resources>
+	<Window.Resources>
 
-        <!-- Родительский стиль -->
-        <Style TargetType="Button" x:Key="DocButton">
-            <Setter Property="Background" Value="DarkBlue" />
-            <Setter Property="Foreground" Value="White" />
-            <Setter Property="FontFamily" Value="Verdana" />
-            <Setter Property="Padding" Value="5" />
-            <Setter Property="Margin" Value="5" />
-        </Style>
+		<!-- Плавность -->
+		<QuadraticEase x:Key="ease" EasingMode="EaseOut"/>
 
-        <!-- Дочерний стиль на основе родительского -->
-        <Style BasedOn="{StaticResource DocButton}"
-               TargetType="Button"
-               x:Key="ActiveDocButton">
-            <Setter Property="Background" Value="DarkRed" />
-        </Style>
+		<!-- Общий стиль для блоков -->
+		<Style x:Key="TextBlockStyle" TargetType="TextBox">
+			<Setter Property="Width" Value="200"/>
+			<Setter Property="Height" Value="100"/>
+			<Setter Property="TextWrapping" Value="Wrap"/>
+			<Setter Property="AcceptsReturn" Value="True"/>
+			<Setter Property="Background" Value="White"/>
+			<Setter Property="FontSize" Value="14"/>
+			<Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>
 
-        <!-- Стиль со встроенным EventSetter для всех кнопок -->
-        <Style TargetType="Button" x:Key="GlobalButtonStyle">
-            <Setter Property="Margin" Value="5" />
-            <EventSetter Event="Click" Handler="Button_Click" />
-        </Style>
+			<Setter Property="RenderTransform">
+				<Setter.Value>
+					<ScaleTransform ScaleX="1" ScaleY="1"/>
+				</Setter.Value>
+			</Setter>
 
-    </Window.Resources>
+			<!-- Триггеры -->
+			<Style.Triggers>
 
-    <StackPanel Orientation="Horizontal" VerticalAlignment="Top">
+				<!-- При фокусе -->
+				<EventTrigger RoutedEvent="GotFocus">
+					<BeginStoryboard>
+						<Storyboard>
 
-        <Button Style="{StaticResource ActiveDocButton}">
-            Открыть
-        </Button>
+							<!-- Перемещение в центр -->
+							<DoubleAnimation Storyboard.TargetProperty="(Canvas.Left)"
+                                             To="300" Duration="0:0:0.4"
+                                             EasingFunction="{StaticResource ease}"/>
 
-        <Button Style="{StaticResource DocButton}">
-            Обработать
-        </Button>
+							<DoubleAnimation Storyboard.TargetProperty="(Canvas.Top)"
+                                             To="150" Duration="0:0:0.4"
+                                             EasingFunction="{StaticResource ease}"/>
 
-        <Button Style="{StaticResource DocButton}">
-            Сохранить
-        </Button>
+							<!-- Увеличение -->
+							<DoubleAnimation Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleX)"
+                                             To="1.3" Duration="0:0:0.4"/>
 
-        <Button Padding="5" Margin="5" Background="Green">
-            Закрыть
-        </Button>
+							<DoubleAnimation Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleY)"
+                                             To="1.3" Duration="0:0:0.4"/>
 
-        <Button Style="{StaticResource GlobalButtonStyle}">
-            Нажми меня
-        </Button>
+						</Storyboard>
+					</BeginStoryboard>
+				</EventTrigger>
 
-    </StackPanel>
+				<!-- Потеря фокуса -->
+				<EventTrigger RoutedEvent="LostFocus">
+					<BeginStoryboard>
+						<Storyboard>
+
+							<!-- Возврат назад (без To!) -->
+							<DoubleAnimation Storyboard.TargetProperty="(Canvas.Left)"
+                                             Duration="0:0:0.4"/>
+
+							<DoubleAnimation Storyboard.TargetProperty="(Canvas.Top)"
+                                             Duration="0:0:0.4"/>
+
+							<!-- Возврат масштаба -->
+							<DoubleAnimation Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleX)"
+                                             To="1" Duration="0:0:0.4"/>
+
+							<DoubleAnimation Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleY)"
+                                             To="1" Duration="0:0:0.4"/>
+
+						</Storyboard>
+					</BeginStoryboard>
+				</EventTrigger>
+
+			</Style.Triggers>
+		</Style>
+
+	</Window.Resources>
+
+	<Canvas>
+
+		<!-- Верхние кнопки -->
+		<StackPanel Orientation="Horizontal"
+                    Canvas.Left="250" Canvas.Top="20">
+
+			<Button Content="Копировать" Margin="5"/>
+			<Button Content="Вырезать" Margin="5"/>
+			<Button Content="Вставить" Margin="5"/>
+
+		</StackPanel>
+
+		<!-- Центральная зона -->
+		<Border Width="250" Height="140"
+                Canvas.Left="300" Canvas.Top="150"
+                Background="#22000000"
+                CornerRadius="15"/>
+
+		<!-- ===== Полукруг из блоков ===== -->
+
+		<!-- Левый -->
+		<TextBox Style="{StaticResource TextBlockStyle}"
+                 Canvas.Left="80" Canvas.Top="330"
+                 Text="Блок 1"/>
+
+		<!-- Лево-центр -->
+		<TextBox Style="{StaticResource TextBlockStyle}"
+                 Canvas.Left="200" Canvas.Top="370"
+                 Text="Блок 2"/>
+
+		<!-- Центр -->
+		<TextBox Style="{StaticResource TextBlockStyle}"
+                 Canvas.Left="350" Canvas.Top="390"
+                 Text="Блок 3"/>
+
+		<!-- Право-центр -->
+		<TextBox Style="{StaticResource TextBlockStyle}"
+                 Canvas.Left="500" Canvas.Top="370"
+                 Text="Блок 4"/>
+
+		<!-- Правый -->
+		<TextBox Style="{StaticResource TextBlockStyle}"
+                 Canvas.Left="620" Canvas.Top="330"
+                 Text="Блок 5"/>
+
+	</Canvas>
 
 </Window>
